@@ -1,36 +1,39 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import logging
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/visualizer'
 db = SQLAlchemy(app)
-
+app.secret_key = 'f43fee5tbt'
 
 # create the model
-class Get_url(db.Model):
+class Url(db.Model):
+	__tablename__ = 'url_counter'
 	id = db.Column(db.Integer, primary_key=True, unique=True)
 	url = db.Column(db.String(120), unique=True)
 
 	def __init__(self, url):
 		self.url = url
 
-db.create_all()
 
-def create_data(url):
-	entry = Get_url(url)
-	db.session.add(entry)
-	db.session.commit()
 
 @app.route('/', methods=['POST', 'GET'])
 def main():
-	# ensure the data is stored once
+	# ensure the data is stored
 	if request.method == 'POST':
 		url = request.form['submit_url']
-		create_data(url)
+		result = Url.query.filter_by(url=url).first()
+		if result:
+			flash("nope")
+			return redirect(url_for('main'))
+		else:
+			entry = Url(url)
+			db.session.add(entry)
+			db.session.commit()
+			return redirect(url_for('main'))
 	else:
-		pass
-	return render_template('main.html')
+		return render_template('main.html')
 
 @app.route('/<name>/')
 def test(name):
@@ -40,6 +43,7 @@ def test(name):
 
 
 if __name__ == '__main__':
-	# create_data()
+	db.drop_all()
+	db.create_all()
 	app.debug = True
 	app.run(host='0.0.0.0')
