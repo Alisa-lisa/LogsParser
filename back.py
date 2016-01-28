@@ -17,17 +17,17 @@ class Get_url(db.Model):
 
 db.create_all()
 
-def create_data():
-	url2 = Get_url('alisadammer.com')
-	db.session.add(url2)
+def create_data(url):
+	entry = Get_url(url)
+	db.session.add(entry)
 	db.session.commit()
 
 @app.route('/', methods=['POST', 'GET'])
 def main():
 	# ensure the data is stored once
 	if request.method == 'POST':
-		if request.form['custom-url']:
-			logging.debug("Got the url")
+		url = request.form['submit_url']
+		create_data(url)
 	else:
 		pass
 	return render_template('main.html')
