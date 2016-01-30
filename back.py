@@ -1,8 +1,15 @@
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import logging
+from werkzeug import secure_filename
+import os
+
+
+COMPRESSED_FILES = set(['.xz', '.tar', '.zip'])
+ALLOWED_EXTENSIONS = set(['txt', 'csv', 'tex', 'jpg', 'jpeg', 'png', 'log'])
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/visualizer'
 db = SQLAlchemy(app)
 app.secret_key = 'f43fee5tbt'
@@ -43,10 +50,26 @@ def main():
 	else:
 		return render_template('main.html')
 
+# check appropriate extension
+def check_extension(filename):
+	return '.' in filename and filename.rsplit('.')[-1] in ALLOWED_EXTENSIONS
+
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
 def upload_log():
+	if request.method == 'POST':
+		file = request.files['upload_log']
+		if file and check_extension(file.filename):
+			log = LogParser(file.filename)
+			db.session.add(log)
+			db.session.commit()
+			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+			return redirect(url_for('upload_log'))
 	return render_template('logs_form.html')
+
+@app.route('/logs/<filename>')
+def uploaded_file(filename):
+	return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/<name>/')
 def test(name):
