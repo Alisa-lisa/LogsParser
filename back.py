@@ -16,7 +16,15 @@ class Url(db.Model):
 	def __init__(self, url):
 		self.url = url
 
+# model for the log parser
+class LogParser(db.Model):
+	__tablename__ = 'log_parser'
+	id = db.Column(db.Integer, primary_key=True, unique=True)
+	log_name = db.Column(db.String(80), unique=False)
+	# think of version representation
 
+	def __init__(self, log_name):
+		self.log_name = log_name 
 
 @app.route('/', methods=['POST', 'GET'])
 def main():
@@ -34,6 +42,11 @@ def main():
 			return redirect(url_for('main'))
 	else:
 		return render_template('main.html')
+
+# function for the logs upload		
+@app.route('/logs', methods=['GET', 'POST'])
+def upload_log():
+	return render_template('logs_form.html')
 
 @app.route('/<name>/')
 def test(name):

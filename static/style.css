@@ -1,3 +1,4 @@
+/* css for main.html */
 .custom-sidebar {
 	position: fixed;
     top: 65px;
@@ -31,3 +32,5 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+/* css for logs_form */
