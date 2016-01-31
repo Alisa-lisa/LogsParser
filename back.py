@@ -3,10 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 from werkzeug import secure_filename
 import os
+import lzma
 
 
-COMPRESSED_FILES = set(['.xz', '.tar', '.zip'])
-ALLOWED_EXTENSIONS = set(['txt', 'csv', 'tex', 'jpg', 'jpeg', 'png', 'log'])
+COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
+ALLOWED_EXTENSIONS = set(['txt', 'csv', 'tex', 'jpg', 'jpeg', 'png', 'log', 'xz'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -51,15 +52,40 @@ def main():
 		return render_template('main.html')
 
 # check appropriate extension
+def check_compression(filename):
+	# the file is compressed, if there are more than one dot in the filename
+	return filename.rsplit('.').count('.') > 1 and filename.rsplit('.')[-1] in COMPRESSION_EXTENSIONS
+
 def check_extension(filename):
 	return '.' in filename and filename.rsplit('.')[-1] in ALLOWED_EXTENSIONS
+
+# extract file, ToDo: other decompression algos
+def extract_file(filename):
+	# currently only for 1 level .xz files
+	inF = filename
+	outF = os.path.splitext(inF)[0] # get the file itself
+	with lzma.open(inF, 'rb') as i:
+		with open(outF, 'wb') as o:
+			o.write(i.read(size=10240))
+			return o
 
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
 def upload_log():
 	if request.method == 'POST':
 		file = request.files['upload_log']
-		if file and check_extension(file.filename):
+		print(file.filename)
+		
+		# check whethre file is compressed
+		# if file and check_compression(file.filename):
+		# 	extracted = extract_file(file.filename)
+		# 	extracted.save(os.path.join(app.config['UPLOAD_FOLDER'], extracted.filename))
+		# 	flash('Got the file')
+		# 	return redirect(url_for('upload_log'))
+
+		# we trust the user for now
+		if file:
+			print('Got here')
 			log = LogParser(file.filename)
 			db.session.add(log)
 			db.session.commit()
