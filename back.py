@@ -54,12 +54,12 @@ def main():
 def extract_file(filename):
 	# currently only for 1 level .xz files
 	inF = filename
-	print(inF)
-	outF =  os.path.splitext(inF)[0] #"{}_{}".format(datetime.datetime.now().strftime("%y%m%d%H%M"), os.path.splitext(inF)[0])
-	print(str(outF))
-	with lzma.open(inF, 'rb') as i:
-		with open(outF, 'wb') as o:
-			o.write(i.read())
+	ext = os.path.splitext(inF)[-1]
+	outF = os.path.splitext(inF)[0] #"{}_{}".format(datetime.datetime.now().strftime("%y%m%d%H%M"), os.path.splitext(inF)[0])
+	if ext == '.xz':
+		with lzma.open(inF, 'rb') as i:
+			with open(outF, 'wb') as o:
+				o.write(i.read())
 
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
