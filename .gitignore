@@ -61,3 +61,15 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+#Uploaded Files
+.jpg
+.jpeg
+.png
+.txt
+.doc
+.docx
+#Extensions are ignored for now
+.tar
+.zip
+.xz
