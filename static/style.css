@@ -34,3 +34,14 @@
 }
 
 /* css for logs_form */
+.custom-log-form {
+    display: inline-flex;
+}
+.custom-log-input {
+    height: inherit;
+    padding-left: 0px;
+    padding-bottom: 0px;
+    padding-top: 1px;
+    background-color: #f5f5f5;
+}
+

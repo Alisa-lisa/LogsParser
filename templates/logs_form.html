@@ -58,12 +58,14 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main custom-general-info">
           <center><h1 class="page-header">Visualisation of the log content</h1></center>
           <div class="row custom-url-field">
-            <title>Upload new File</title>
+            <center><title>Upload new File</title>
             <h1>Upload new File</h1>
-            <form action="" method=post enctype=multipart/form-data>
-              <input type='file' name='upload_log'>
-              <input type='submit' value='Upload'>
-            </form>
+            <div class="input-group">
+              <form action="" method='post' enctype='multipart/form-data' class='custom-log-form'>
+                <input type='file' class="form-control custom-log-input" name='upload_log'>
+                <input type='submit' value="upload">
+              </form>
+            </center>
           </div>
         </div>
       </div>

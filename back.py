@@ -74,18 +74,8 @@ def extract_file(filename):
 def upload_log():
 	if request.method == 'POST':
 		file = request.files['upload_log']
-		print(file.filename)
-		
-		# check whethre file is compressed
-		# if file and check_compression(file.filename):
-		# 	extracted = extract_file(file.filename)
-		# 	extracted.save(os.path.join(app.config['UPLOAD_FOLDER'], extracted.filename))
-		# 	flash('Got the file')
-		# 	return redirect(url_for('upload_log'))
-
 		# we trust the user for now
 		if file:
-			print('Got here')
 			log = LogParser(file.filename)
 			db.session.add(log)
 			db.session.commit()
