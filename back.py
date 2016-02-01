@@ -79,6 +79,10 @@ def upload_log():
 				extract_file(path_name) 
 				os.remove(path_name)
 				return redirect(url_for('upload_log'))
+			else:
+				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+				file.save(path_name)
+				return redirect(url_for('upload_log'))
 	return render_template('logs_form.html')
 
 @app.route('/logs/<filename>')
