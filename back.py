@@ -4,7 +4,7 @@ import logging
 from werkzeug import secure_filename
 import os
 import lzma
-
+import datetime 
 
 COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
 ALLOWED_EXTENSIONS = set(['txt', 'csv', 'tex', 'jpg', 'jpeg', 'png', 'log', 'xz'])
@@ -79,7 +79,8 @@ def upload_log():
 			log = LogParser(file.filename)
 			db.session.add(log)
 			db.session.commit()
-			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+			# ToDo improve unique names
+			file.save(os.path.join(app.config['UPLOAD_FOLDER'], "{}_{}".format(datetime.datetime.now().strftime("%y%m%d%H%M"), file.filename)))
 			return redirect(url_for('upload_log'))
 	return render_template('logs_form.html')
 
