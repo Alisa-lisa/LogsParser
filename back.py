@@ -73,10 +73,10 @@ def extract_file(filename):
 	# 			o.write(i.read())
 	elif ext == '.tar':
 		with tarfile.open(inF, mode='r|*') as i:
-			i.extractall()
+			i.extractall(path=app.config["UPLOAD_FOLDER"])
 	elif ext == '.gz':
 		with tarfile.open(inF, mode='r|*') as i:
-			i.extractall()	
+			i.extractall(path=app.config["UPLOAD_FOLDER"])	
 
 
 
