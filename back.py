@@ -66,8 +66,16 @@ def extract_file(filename):
 		with zipfile.ZipFile(inF, 'r') as z:
 			with open(outF, 'wb') as i:
 				i.write(z.read(name))
-	elif ext == '.rar':
-		pass
+	# couldn't test it
+	# elif ext == '.rar':
+	# 	with tarfile.open(inF, 'r') as i:
+	# 		with open(outF, 'wb') as o:
+	# 			o.write(i.read())
+	elif ext == '.tar':
+		with tarfile.open(inF, mode='r|*') as i:
+			i.extractall(path='lol')
+	
+
 
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
