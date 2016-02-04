@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 from werkzeug import secure_filename
 import os
-import lzma
+import lzma, zipfile, tarfile
 import datetime 
 
 COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
@@ -50,7 +50,8 @@ def main():
 	else:
 		return render_template('main.html')
 
-# extract file, ToDo: other decompression algos
+# extract file
+# extractable ext: ['.xz','.zip','.rar','.tar','.gz','.tgz']
 def extract_file(filename):
 	# currently only for 1 level .xz files
 	inF = filename
@@ -60,6 +61,13 @@ def extract_file(filename):
 		with lzma.open(inF, 'rb') as i:
 			with open(outF, 'wb') as o:
 				o.write(i.read())
+	elif ext == '.zip':
+		name = os.path.splitext(inF)[0]
+		with zipfile.ZipFile(inF, 'r') as z:
+			with open(outF, 'wb') as i:
+				i.write(z.read(name))
+	elif ext == '.rar':
+		pass
 
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
