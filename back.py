@@ -73,8 +73,11 @@ def extract_file(filename):
 	# 			o.write(i.read())
 	elif ext == '.tar':
 		with tarfile.open(inF, mode='r|*') as i:
-			i.extractall(path='lol')
-	
+			i.extractall()
+	elif ext == '.gz':
+		with tarfile.open(inF, mode='r|*') as i:
+			i.extractall()	
+
 
 
 # function for the logs upload		
