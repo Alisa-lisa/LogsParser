@@ -1,10 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-import logging
+import logging, os, lzma, zipfile, tarfile, datetime 
 from werkzeug import secure_filename
-import os
-import lzma, zipfile, tarfile
-import datetime 
 
 COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
 
