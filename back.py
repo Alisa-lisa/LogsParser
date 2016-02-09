@@ -45,7 +45,7 @@ def main():
 			db.session.commit()
 			return redirect(url_for('main'))
 	else:
-		return render_template('main.html')s.com
+		return render_template('main.html').com
 
 # extract file
 # extractable ext: ['.xz','.zip','.rar','.tar','.gz','.tgz']
