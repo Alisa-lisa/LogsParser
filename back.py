@@ -45,7 +45,7 @@ def main():
 			db.session.commit()
 			return redirect(url_for('main'))
 	else:
-		return render_template('main.html').com
+		return render_template('main.html')
 
 # extract file
 # extractable ext: ['.xz','.zip','.rar','.tar','.gz','.tgz']
@@ -104,6 +104,10 @@ def upload_log():
 @app.route('/logs/<filename>')
 def uploaded_file(filename):
 	return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/myCv')
+def myCV():
+	return render_template('myCV.html')
 
 @app.route('/<name>/')
 def test(name):

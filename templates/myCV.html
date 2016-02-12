@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href={{ url_for('static', filename='cv.css') }} rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
+  </head>
+  <body>
+    <!--Navigation bar-->
+    <div class="container">
+      <div class="row row-header">
+        <div class="col-md-6 address-col">
+          <h>Alisa Dammer</h>
+          <p id="qualification">Data Analyst, Data Scientist</p>
+          <address>
+            <ul>
+              <li><i class="fa fa-envelope-o letter-icon"></i><a href="mailto:alisa.dammer@gmail.com">alisa.dammer@gmail.com</a></li>
+              <li><i class="fa fa-home address-icon"></i>Wördemanns Weg 4</li>
+              <li>22527 Hamburg, Germany</li>
+              <li><i class="fa fa-mobile mobile-icon"></i>+4917680767743</li>
+              <li>
+                <ul class="list-inline">
+                  <li><a href="https://github.com/Alisa-lisa"><i class="fa fa-github"></i></a></li>
+                  <li><a href=""><i class="fa fa-google-plus"></i></a></li>
+                  <li><a href="https://vk.com/a_dammer"><i class="fa fa-vk"></i></a></li>
+                </ul>
+              </li>
+          </address>
+        </div>
+        <div class="col-md-6">
+          <img class="img-responsive my-img" src="{{ url_for('static', filename='me.jpg') }}"></img>
+        </div>
+      </div>
+      <div class="row-body">
+        <div class="row" id="underlined">
+          <div class="col-sm-3">
+            <h2>About me</h2>
+          </div>
+          <div class="col-sm-9">
+            <p>My single biggest interest is data analysis. Most of all I am fascinated by neural networks and their usage in different spheres, especially computing financial forecasts. During my first bachelor I have gained a sufficient theoretical background in mathematics and statistics which allows me to work in scientific contexts without  difficulties. During my second bachelor I have gained a solid set of programming skills.</p>
+            <p>I love learning new things, even if they are not directly connected to my major interest. One of my side interests is building and programming small robots. Another interest of mine is digital photography and photo manipulation. Another important part of my life is sport: I like dancing, working out, snowboarding and I am open to the new sport arts.</p>
+            <p>I am an easy going person able to work in a team as well as alone. While working in a team, I especially like brain storming sessions since during those you get to know people better than during casual situations. While working alone on the project, I like feeling responsibility and freedom to choose most appropriate way to finish the task.</p>
+          </div>
+        </div>
+        <div class="row" id="underlined">
+          <div class="col-sm-3">
+            <h2>Technologies</h2>
+          </div>
+          <div class="col-sm-9">
+            <ul id="list-skills">
+              <li>Data analysis: regressions, statistic tests, machine learning</li>
+              <li>Data visualization: d3.js, matplotlib, ggplot</li>
+              <li>Embedded programming Arduino</li>
+              <li>Game development: python sfml, lua love2d, javascript with phaser.js, panda.js</li>
+              <li>Graphic design: krita, gimp, photoshop, darktable</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row" id="underlined">
+          <div class="col-sm-3">
+            <h2>Skills</h2>
+          </div>
+          <div class="col-sm-9">
+            <ul id="list-skills">
+              <li>Natural languages: Russian (native speaker), German (fluent), English (fluent)</li>
+              <li>Programming languages (skill descending order): Python, R, JavaScript, Lua, Java</li>
+              <li>Markup languages: HTML, CSS</li> 
+              <li>SQL (MariaDB, PostgresQL)</li>
+              <li>Additional technologies:Data git, Trello, Zenhub, Slack, Asana</li> 
+            </ul>
+          </div>
+        </div>
+        <div class="row" id="underlined">
+          <div class="col-sm-3">
+            <h2>Projects</h2>
+          </div>
+          <div class="col-sm-9">
+            <ul id="list-skills">
+              <li> <a href="https://github.com/Alisa-lisa/bgj" id="projects"><strong>Hunger Games</strong>: A game I made during BaconGameJam (Phaser JS).</a></li>
+              <li><a href="https://github.com/Alisa-lisa/MyFunProjects" id="projects"><strong>Mother Russia</strong>: A game about stereoptypes (Phaser JS, Krita)</a></li>
+              <li><a href="https://github.com/Alisa-lisa/uni-stuff/tree/master/Bachelor" id="projects"><strong>Python vs R on an simple statistical example</strong>: Second bachelor thesis</a></li>
+              <li><a href="https://github.com/svenstaro/uni/tree/master/proj" id="projects"/><strong>Simple CPU</strong>: simple CPU written for a university project using MyHDL</a></li>
+              <li><strong>Hyper Okagon</strong>: A game for local game jam. Here I did the graphics. You can play the game on:<a href="http://hyper-oktagon.github.io/">game</a> and the code can be found on:<a href="https://github.com/svenstaro/innojam8">github</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="row" id="underlined">
+          <div class="col-sm-3">
+            <h2>Education</h2>
+          </div>
+          <div class="col-sm-9">
+            <h4>Gymnasium №3, Novosibirsk, Russian Federation <small>(1997-2007)</small></h4>
+            <h4>Novosibirsk State University, Economical Department, Economics <small>(2007-2011)</small></h4>
+            <p>The bachelor thesis consisted in proving that classical portfolio models are ineffective on modern Russian stock exchanges. Thus I suggested an adopted approach for choosing the portfolio for a private investor.</p>
+            <h4>University Hamburg, MIN faculty, Information Systems study<small> (2011-2015)</small></h4>
+            <p>The goal of my second bachelor thesis was to check what language is more suitable for an econometric task written on the beginner level. Python and R were chosen for comparison, since these two languages are heavily used by both scientific and non-scientific communities. To answer this question I have written two identical Programs (with respect to the language's features and idiomatic style) in Python and R and have run performace and memory usage tests. I have also compared subjective usability (ease of use, documentation quality, community) of the langages.</p>
+          </div>
+        </div>
+        <div class="row" id="underlined">
+          <div class="col-sm-3">
+            <h2>Experience</h2>
+          </div>
+          <div class="col-sm-9">
+            <h4>Everbase AG <small>(2015-05 &ndash; 2015-08)</small></h4>
+            <p>Graphics manipulation, design</p>
+            <h4>Eversolve <small>(2015-08 &ndash; 2016-01)</small></h4>
+            <p>Front end developer (Angular.js, Bootstrap)</p>
+          </div>
+        </div>
+        <h3>Copyright 2015 Alisa Dammer</h3>
+      </div>
+    </div>
+      
+    <!--/.conatiner-middle-->
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
