@@ -75,3 +75,5 @@ uploads/
 .tar
 .zip
 .xz
+# Temporary files are not allowed
+.txt
