@@ -105,6 +105,10 @@ def upload_log():
 def uploaded_file(filename):
 	return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/fin')
+def financial_controller():
+	return render_template('financial_controller.html')
+
 @app.route('/myCv')
 def myCV():
 	return render_template('myCV.html')

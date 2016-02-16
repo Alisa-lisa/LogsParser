@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="http://sstatic.net/so/favicon.ico">
 
-    <title>LogsVisualizer</title>
+    <title>DataVisualizer</title>
 
     <!-- Bootstrap core CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -21,7 +21,7 @@
   </head>
 
   <body>
-
+<!-- Header start -->
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -55,19 +55,13 @@
             <li><a href="{{ url_for('financial_controller') }}">Financial Controller</a></li>
           </ul>
         </div>
+<!-- Header end -->
+<!-- Body start -->
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main custom-general-info">
-          <center><h1 class="page-header">Visualisation of the log content</h1></center>
-          <div class="row custom-url-field">
-            <center><title>Upload new File</title>
-            <h1>Upload new File</h1>
-            <div class="input-group">
-              <form action="" method='post' enctype='multipart/form-data' class='custom-log-form'>
-                <input type='file' class="form-control custom-log-input" name='upload_log'>
-                <input type='submit' value="upload">
-              </form>
-            </center>
-          </div>
+          <center><h1 class="page-header">Financial controller</h1></center>
+          <div><center><h>Nothing to display yet</h></center></div>
         </div>
+<!-- Body end -->
       </div>
     </div>
 
@@ -75,7 +69,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    // <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
   </body>
 </html>

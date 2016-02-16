@@ -35,7 +35,7 @@ def convert_file(file):
 		new_line.append(address)
 		s = s.replace(r[0], '#') 
 		# get time via regex, cause simple
-		re_time = r"(\[.*\])" 
+		re_time = r"(\[[0-9].*[0-9]\])"
 		time = re.search(re_time, s).group(0)
 		new_line.append(time)
 		s = s.replace(time, '#')
@@ -56,7 +56,7 @@ def convert_file(file):
 		s = s.replace(reference, '#')
 		# get agent
 		r = s.split('"')
-		agent = '"' + str(r[1]) + '"'
+		agent = '"' + str(r[0]) + '"'
 		new_line.append(agent)
 		s = s.replace(agent, '#')
 		# create immense dictionary for data.frame
@@ -67,9 +67,11 @@ def convert_file(file):
 		df_dict['size_bytes'].append(new_line[3])
 		df_dict['reference'].append(new_line[4])
 		df_dict['agent'].append(new_line[5])
-	return df_dict
+
+		df = pd.DataFrame(df_dict)
+	return df
 
 if __name__ == '__main__':
-	# df = convert_file('test.txt') 
-	# for key in df.keys():
-	# 	print(str(key), df[key])
+	# df = convert_file('access.txt') 
+	# print(df.head(5))
+	
