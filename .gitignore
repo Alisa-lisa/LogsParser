@@ -76,4 +76,4 @@ uploads/
 .zip
 .xz
 # Temporary files are not allowed
-.txt
+*.txt
