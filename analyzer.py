@@ -21,13 +21,17 @@ def make_readable(file):
 # returns teh name of the file
 def reservoir_algo(input, sample_size):
 	f = open(input)
-	# outF = 'test_' + input
+	outF = 'test_' + input
+	o = open(outF, 'w')
 	# get a single random line:
 	total_size_b = os.stat(input).st_size
-	rand_line = random.randint(0, total_size_b)
-	f.seek(rand_line)
-	f.readline()
-	return f.readline()
+	for i in range(0, sample_size):
+		rand_line = random.randint(0, total_size_b)
+		f.seek(rand_line)
+		f.readline()
+		r = f.readline()
+		o.write(str(r))
+	return outF
 
 
 def convert_file(file):
@@ -99,6 +103,6 @@ def convert_file(file):
 if __name__ == '__main__':
 	# df = convert_file('test.txt') 
 	# print(len(df['address']))
-	r = reservoir_algo('access.txt', 10)
-	print(r)
+	r = reservoir_algo('access.txt', 10000)
+	print(os.stat(r).st_size)
 
