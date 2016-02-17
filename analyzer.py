@@ -15,6 +15,18 @@ def make_readable(file):
 	os.remove(inF)
 	return str(outF)
 
+# count the number of lines in the file, the size of the file and approximate size of a line in bytes
+def file_info(file):
+	f = open(file)
+	lines = 0
+	line_size = 0
+	size = os.stat(file).st_size
+	for l in f:
+		lines += 1
+	line_size = size / lines
+
+	return size, lines, line_size
+
 # the information about this sampling can be found on https://en.wikipedia.org/wiki/Reservoir_sampling
 # in our case S(n) - input file with n lines (we assume n is unknown)
 # R(k) - output file called "test_filename.ext" with k lines (k is given in the parameters)
@@ -97,12 +109,20 @@ def convert_file(file):
 		df = pd.DataFrame(df_dict)
 
 		# test function, to know where we got the parse error
-		print(len(df['address']))
+		# print(len(df['address']))
 	return df
 
 if __name__ == '__main__':
-	# df = convert_file('test.txt') 
-	# print(len(df['address']))
-	r = reservoir_algo('access.txt', 10000)
-	print(os.stat(r).st_size)
+	# s, l, ls = file_info('access.txt')
+	# print(s, l , ls)
+
+	# print(np.ceil(100000000/ls))
+
+	# r = reservoir_algo('access.txt', 600566)
+	# print(os.stat(r).st_size)
+
+	df = convert_file('test_access.txt') 
+	print(len(df['address']))
+
+
 
