@@ -1,10 +1,12 @@
 # read the log file
 # from llvmlite import binding
+# import numba
 # from numba import jit
 import os, re, random
 import numpy as np
 import pandas as pd
 # from multiprocessing import Process
+
 # @jit
 def make_readable(file):
 	inF = file
@@ -45,84 +47,91 @@ def reservoir_algo(input, sample_size):
 		o.write(str(r))
 	return outF
 
-
-def convert_file(file):
-	# open file for r\w
-	f = open(file, 'r')
-
-	df_dict = {'address':[], 'time':[], 'request':[], 'size_bytes':[], 'reference':[], 'agent':[]}
-	df = None
-
-	for s in f:
-		new_line = []
+# we parse only a string, so let's use string as input parameter
+def parse(s):
+	new_line = []
 	# clean s from delimeters
-		if re.search("( - - )", s) != None:
-			delimiter = re.search("( - - )", s).group(0)
-			s = s.replace(delimiter, " ")
+	if re.search("( - - )", s) != None:
+		delimiter = re.search("( - - )", s).group(0)
+		s = s.replace(delimiter, " ")
 
 	# recognize address
-		r = s.split(' ')
-		address = r[0]
-		new_line.append(address)
-		s = s.replace(r[0], '#') 
-		# get time via regex, cause simple
-		re_time = r"(\[[0-9].*[0-9]\])"
-		time = re.search(re_time, s).group(0)
-		new_line.append(time)
-		s = s.replace(time, '#')
-		# get request
+	r = s.split(' ')
+	address = r[0]
+	new_line.append(address)
+	s = s.replace(r[0], '#') 
+	# get time via regex, cause simple
+	re_time = r"(\[[0-9].*[0-9]\])"
+	time = re.search(re_time, s).group(0)
+	new_line.append(time)
+	s = s.replace(time, '#')
+	# get request
+	r = s.split('"')
+	request = '"' + str(r[1]) + '"'
+	new_line.append(request)
+	s = s.replace(request, '#')
+	# get size via regex, cause ez
+	re_size = r"([0-9]{1,3} [0-9]{1,9})" 
+	size = re.search(re_size, s).group(0)
+	new_line.append(size)
+	s = s.replace(size, '#')
+	# get reference, here if suddenly stays # - means, that it was refered from own ipv4/6 (can not really happen) 
+	# here can also happen, that no agent ingo is provided, in this case we need to distinguish between "-" and "-" 
+	r = s.split('"')
+	reference = '"' + str(r[1]) + '"'
+	new_line.append(reference)
+	# here we need a check, that something is still left for agent, if not -> agent = '"-"'
+	# if there were no agent info provided, than s looks like this: '# # # # # #', it contains 6 signs '#'
+	s = s.replace(reference, '#')
+	# agent info is provided
+	if s.count('#') < 6:
+		# get agent normally
 		r = s.split('"')
-		request = '"' + str(r[1]) + '"'
-		new_line.append(request)
-		s = s.replace(request, '#')
-		# get size via regex, cause ez
-		re_size = r"([0-9]{1,3} [0-9]{1,9})" 
-		size = re.search(re_size, s).group(0)
-		new_line.append(size)
-		s = s.replace(size, '#')
-		# get reference, here if suddenly stays # - means, that it was refered from own ipv4/6 (can not really happen) 
-		# here can also happen, that no agent ingo is provided, in this case we need to distinguish between "-" and "-" 
-		r = s.split('"')
-		reference = '"' + str(r[1]) + '"'
-		new_line.append(reference)
-		# here we need a check, that something is still left for agent, if not -> agent = '"-"'
-		# if there were no agent info provided, than s looks like this: '# # # # # #', it contains 6 signs '#'
-		s = s.replace(reference, '#')
-		# agent info is provided
-		if s.count('#') < 6:
-			# get agent normally
-			r = s.split('"')
-			agent = '"' + str(r[1]) + '"'
-			new_line.append(agent)
-			s = s.replace(agent, '#')
-		else:
-			agent = '"-"' 
-			new_line.append(agent)
-		# create immense dictionary for data.frame
-		# df_dict = {'address':[], 'time':[], 'request':[], 'size_bytes':[], 'reference':[], 'agent':[]}
-		df_dict['address'].append(new_line[0])
-		df_dict['time'].append(new_line[1])
-		df_dict['request'].append(new_line[2])
-		df_dict['size_bytes'].append(new_line[3])
-		df_dict['reference'].append(new_line[4])
-		df_dict['agent'].append(new_line[5])
-		df = pd.DataFrame(df_dict)
+		agent = '"' + str(r[1]) + '"'
+		new_line.append(agent)
+		s = s.replace(agent, '#')
+	else:
+		agent = '"-"' 
+		new_line.append(agent)
+	return new_line
 
-		# test function, to know where we got the parse error
-		# print(len(df['address']))
-	return df
+# split the file into chunks, create DataFrame for each chunk, process separately, save results into globals, clear all
+def split_file(file, split_faktor):
+	pass
 
 if __name__ == '__main__':
-	# s, l, ls = file_info('access.txt')
-	# print(s, l , ls)
+	# global results:
+	false_addresses = 0 # the number of non-valid ipadresses in the log file 
+	ip_by_country = {} # {'country':int}
+	ipv4_total = 0 # total number of the ipv4
+	ipv6_total = 0 # total number of the ipv6
 
-	# print(np.ceil(100000000/ls))
+	# test splitting
+	s, l, ls = file_info('test.txt')
+	print(s, l, ls)
+	f = open('test.txt')
+	# split file into chunks, save to df and process, save results to the global variables
+	# split into 11 chunks and then combine it all together
+	# Currently only last df is given back => no processing yet
+	for j in range(0, l, 10):
+		d = {'address':[], 'time':[], 'request':[], 'size':[], 'refer':[], 'agent':[]}
+		for i in range(0 + j,10 + j):
+			s = f.readline()
+			res = parse(s)
+			d['address'].append(res[0])
+			d['time'].append(res[1])
+			d['request'].append(res[2])
+			d['size'].append(res[3])
+			d['refer'].append(res[4])
+			d['agent'].append(res[5])
+	df = pd.DataFrame(d)
+	print(len(df["address"]))
 
-	# r = reservoir_algo('access.txt', 600566)
-	# print(os.stat(r).st_size)
-
-	df = convert_file('test_access.txt') 
-	print(len(df['address']))
-
+	# validate the address, isAddress, islocal, isPrivate
+	# if ipv6 or ipv4 -> True, else False
+	# def validate_address(address):
+	# 	for item in 
 
 
+
+	print(df.columns.values)
