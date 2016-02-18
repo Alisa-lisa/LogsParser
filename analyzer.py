@@ -133,7 +133,18 @@ if __name__ == '__main__':
 			if ipaddress.ip_address(df['address'][i]):
 				# create new column with fasle or true
 				df['valid_ip'][i] = True
+				if type(ipaddress.ip_address(df['address'][i])) == ipaddress.IPv4Address:
+					ipv4_total += 1
+				else:
+					ipv6_total += 1
 		except ValueError:
 			print('here we see a problem!')
 			df['valid_ip'][i] = False	
+			# count false ip 
+			false_addresses += 1
+		# count number of ipv6
 	print(df)
+
+	print('false_addresses:', false_addresses)
+	print('ipv6_total:', ipv6_total)
+	print('ipv4_total:', ipv4_total)
