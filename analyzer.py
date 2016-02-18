@@ -2,7 +2,7 @@
 # from llvmlite import binding
 # import numba
 # from numba import jit
-import os, re, random
+import os, re, random, ipaddress
 import numpy as np
 import pandas as pd
 # from multiprocessing import Process
@@ -125,13 +125,15 @@ if __name__ == '__main__':
 			d['refer'].append(res[4])
 			d['agent'].append(res[5])
 	df = pd.DataFrame(d)
-	print(len(df["address"]))
-
 	# validate the address, isAddress, islocal, isPrivate
 	# if ipv6 or ipv4 -> True, else False
-	# def validate_address(address):
-	# 	for item in 
-
-
-
-	print(df.columns.values)
+	df['valid_ip'] = True
+	for i in range(0, len(df)):
+		try:
+			if ipaddress.ip_address(df['address'][i]):
+				# create new column with fasle or true
+				df['valid_ip'][i] = True
+		except ValueError:
+			print('here we see a problem!')
+			df['valid_ip'][i] = False	
+	print(df)
