@@ -1,6 +1,7 @@
 import os, re, random, ipaddress, cProfile, re
 import numpy as np
 import pandas as pd
+import geoip2
 import geoip2.database as gipd
 from multiprocessing import Pool
 
@@ -93,19 +94,16 @@ def parse(s):
 		new_line.append(agent)
 	return new_line
 
-def get_statistics():
+def get_statistics(file_name):
+	f = open(file_name)
 	# create reader object to determine ips origin
 	r = gipd.Reader('tmp/GeoLite2-Country.mmdb')
 	# global results:
 	false_addresses = 0 # the number of non-valid ipadresses in the log file 
-	ip_by_country = {} # {'country':int}
+	ip_by_country = {'undefined':0} # {'country':int}
 	ipv4_total = 0 # total number of the ipv4
 	ipv6_total = 0 # total number of the ipv6
-	# test splitting
-	s, l, ls = file_info('test.txt')
-	print(s, l, ls)
-	f = open('test.txt')
-	# split into 11 chunks and then combine the results together
+
 	for line in f:
 		res = parse(line)
 		# validate the address, isAddress, islocal, isPrivate
@@ -116,20 +114,23 @@ def get_statistics():
 				else:
 					ipv6_total += 1
 				# count appereance of each ip of the country country = {'country_name':0}
-				origin = r.country(res[0])
-				if origin.country.name not in ip_by_country.keys():
-					ip_by_country[str(origin.country.name)] = 1
-				else:
-					ip_by_country[str(origin.country.name)] += 1
+				try:
+					if r.country(res[0]):
+						origin = r.country(res[0])
+						if origin.country.name not in ip_by_country.keys():
+							ip_by_country[str(origin.country.name)] = 1
+						else:
+							ip_by_country[str(origin.country.name)] += 1
+				except geoip2.errors.AddressNotFoundError:
+					ip_by_country['undefined'] += 1
 		except ValueError:
 			false_addresses += 1
-	print('ip_by_country:', ip_by_country)
-	print('false_addresses:', false_addresses)
-	print('ipv4_total:', ipv4_total)
-	print('ipv6_total:', ipv6_total)
 	return false_addresses, ipv4_total, ipv6_total, ip_by_country
 
 if __name__ == '__main__':
-	errors, ipv4, ipv6, geo = get_statistics()
-	# cProfile.run('re.compile(test2_parse())')
-	# cProfile.run('re.compile(test1_parse())')
+	# test = reservoir_algo('access.txt', 50000) 
+	# errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
+	# print(errors, ipv4, ipv6, geo)
+	# print(geo['undefined'])
+
+	cProfile.run('re.compile(get_statistics("test_access.txt"))')
