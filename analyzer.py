@@ -5,6 +5,7 @@
 import os, re, random, ipaddress
 import numpy as np
 import pandas as pd
+import geoip2.database as gipd
 # from multiprocessing import Process
 
 # @jit
@@ -105,6 +106,8 @@ if __name__ == '__main__':
 	ip_by_country = {} # {'country':int}
 	ipv4_total = 0 # total number of the ipv4
 	ipv6_total = 0 # total number of the ipv6
+	# count appearance for an ip from a country = {'country_name':0}
+	countries = {}
 
 	# test splitting
 	s, l, ls = file_info('test.txt')
@@ -128,23 +131,35 @@ if __name__ == '__main__':
 	# validate the address, isAddress, islocal, isPrivate
 	# if ipv6 or ipv4 -> True, else False
 	df['valid_ip'] = True
+	# create reader object to determine ips origin
+	r = gipd.Reader('tmp/GeoLite2-Country.mmdb')
+
 	for i in range(0, len(df)):
 		try:
 			if ipaddress.ip_address(df['address'][i]):
 				# create new column with fasle or true
 				df['valid_ip'][i] = True
+				# count ipv4 and ipv6
 				if type(ipaddress.ip_address(df['address'][i])) == ipaddress.IPv4Address:
 					ipv4_total += 1
 				else:
 					ipv6_total += 1
+				# count appereance of each ip of the country country = {'country_name':0}
+				res = r.country(df['address'][i])
+				if res.country.name not in countries.keys():
+					countries[str(res.country.name)] = 1
+				else:
+					countries[str(res.country.name)] += 1
+
 		except ValueError:
 			print('here we see a problem!')
 			df['valid_ip'][i] = False	
 			# count false ip 
 			false_addresses += 1
-		# count number of ipv6
+
 	print(df)
 
 	print('false_addresses:', false_addresses)
 	print('ipv6_total:', ipv6_total)
 	print('ipv4_total:', ipv4_total)
+	print('countries:', countries)
