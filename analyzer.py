@@ -1,10 +1,6 @@
 import os, re, random, ipaddress, cProfile, re
-import numpy as np
-import pandas as pd
 import geoip2
 import geoip2.database as gipd
-from multiprocessing import Pool
-
 
 # some helper functions
 def make_readable(file):
@@ -47,6 +43,7 @@ def reservoir_algo(input, sample_size):
 	return outF
 
 # we parse only a string, so let's use string as input parameter
+## TODO: let's do only ip extraction 
 def parse(s):
 	new_line = []
 	# clean s from delimeters
@@ -94,6 +91,7 @@ def parse(s):
 		new_line.append(agent)
 	return new_line
 
+# @profile
 def get_statistics(file_name):
 	f = open(file_name)
 	# create reader object to determine ips origin
@@ -128,9 +126,8 @@ def get_statistics(file_name):
 	return false_addresses, ipv4_total, ipv6_total, ip_by_country
 
 if __name__ == '__main__':
-	# test = reservoir_algo('access.txt', 50000) 
-	# errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
+	# Create 5,6MiB file
+	# test = reservoir_algo('access.txt', 35000) 
+	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
 	# print(errors, ipv4, ipv6, geo)
 	# print(geo['undefined'])
-
-	cProfile.run('re.compile(get_statistics("test_access.txt"))')
