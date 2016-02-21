@@ -1,14 +1,11 @@
-# read the log file
-# from llvmlite import binding
-# import numba
-# from numba import jit
-import os, re, random, ipaddress
+import os, re, random, ipaddress, cProfile, re
 import numpy as np
 import pandas as pd
 import geoip2.database as gipd
-# from multiprocessing import Process
+from multiprocessing import Pool
 
-# @jit
+
+# some helper functions
 def make_readable(file):
 	inF = file
 	outF = os.path.splitext(inF)[0] + '.txt'
@@ -96,11 +93,7 @@ def parse(s):
 		new_line.append(agent)
 	return new_line
 
-# split the file into chunks, create DataFrame for each chunk, process separately, save results into globals, clear all
-def split_file(file, split_faktor):
-	pass
-
-if __name__ == '__main__':
+def get_statistics():
 	# create reader object to determine ips origin
 	r = gipd.Reader('tmp/GeoLite2-Country.mmdb')
 	# global results:
@@ -108,56 +101,35 @@ if __name__ == '__main__':
 	ip_by_country = {} # {'country':int}
 	ipv4_total = 0 # total number of the ipv4
 	ipv6_total = 0 # total number of the ipv6
-	# count appearance for an ip from a country = {'country_name':0}
-	countries = {}
-
 	# test splitting
 	s, l, ls = file_info('test.txt')
 	print(s, l, ls)
 	f = open('test.txt')
-	# split file into chunks, save to df and process, save results to the global variables
-	# split into 11 chunks and then combine it all together
-	# Currently only last df is given back => no processing yet
-	for j in range(0, l, 10):
-		d = {'address':[], 'time':[], 'request':[], 'size':[], 'refer':[], 'agent':[]}
-		for i in range(0 + j,10 + j):
-			s = f.readline()
-			res = parse(s)
-			d['address'].append(res[0])
-			d['time'].append(res[1])
-			d['request'].append(res[2])
-			d['size'].append(res[3])
-			d['refer'].append(res[4])
-			d['agent'].append(res[5])
-		df = pd.DataFrame(d)
-	# validate the address, isAddress, islocal, isPrivate
-	# if ipv6 or ipv4 -> True, else False
-		df['valid_ip'] = True
-
-		for i in range(0, len(df)):
-			try:
-				if ipaddress.ip_address(df['address'][i]):
-					# create new column with fasle or true
-					df['valid_ip'][i] = True
-					# count ipv4 and ipv6
-					if type(ipaddress.ip_address(df['address'][i])) == ipaddress.IPv4Address:
-						ipv4_total += 1
-					else:
-						ipv6_total += 1
-					# count appereance of each ip of the country country = {'country_name':0}
-					res = r.country(df['address'][i])
-					if res.country.name not in countries.keys():
-						countries[str(res.country.name)] = 1
-					else:
-						countries[str(res.country.name)] += 1
-
-			except ValueError:
-				print('here we see a problem!')
-				df['valid_ip'][i] = False	
-				# count false ip 
-				false_addresses += 1
-
+	# split into 11 chunks and then combine the results together
+	for line in f:
+		res = parse(line)
+		# validate the address, isAddress, islocal, isPrivate
+		try:
+			if ipaddress.ip_address(res[0]):
+				if type(ipaddress.ip_address(res[0])) == ipaddress.IPv4Address:
+					ipv4_total += 1
+				else:
+					ipv6_total += 1
+				# count appereance of each ip of the country country = {'country_name':0}
+				origin = r.country(res[0])
+				if origin.country.name not in ip_by_country.keys():
+					ip_by_country[str(origin.country.name)] = 1
+				else:
+					ip_by_country[str(origin.country.name)] += 1
+		except ValueError:
+			false_addresses += 1
+	print('ip_by_country:', ip_by_country)
 	print('false_addresses:', false_addresses)
-	print('ipv6_total:', ipv6_total)
 	print('ipv4_total:', ipv4_total)
-	print('countries:', countries)
+	print('ipv6_total:', ipv6_total)
+	return false_addresses, ipv4_total, ipv6_total, ip_by_country
+
+if __name__ == '__main__':
+	errors, ipv4, ipv6, geo = get_statistics()
+	# cProfile.run('re.compile(test2_parse())')
+	# cProfile.run('re.compile(test1_parse())')
