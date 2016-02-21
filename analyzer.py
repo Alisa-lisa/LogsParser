@@ -101,6 +101,8 @@ def split_file(file, split_faktor):
 	pass
 
 if __name__ == '__main__':
+	# create reader object to determine ips origin
+	r = gipd.Reader('tmp/GeoLite2-Country.mmdb')
 	# global results:
 	false_addresses = 0 # the number of non-valid ipadresses in the log file 
 	ip_by_country = {} # {'country':int}
@@ -127,37 +129,33 @@ if __name__ == '__main__':
 			d['size'].append(res[3])
 			d['refer'].append(res[4])
 			d['agent'].append(res[5])
-	df = pd.DataFrame(d)
+		df = pd.DataFrame(d)
 	# validate the address, isAddress, islocal, isPrivate
 	# if ipv6 or ipv4 -> True, else False
-	df['valid_ip'] = True
-	# create reader object to determine ips origin
-	r = gipd.Reader('tmp/GeoLite2-Country.mmdb')
+		df['valid_ip'] = True
 
-	for i in range(0, len(df)):
-		try:
-			if ipaddress.ip_address(df['address'][i]):
-				# create new column with fasle or true
-				df['valid_ip'][i] = True
-				# count ipv4 and ipv6
-				if type(ipaddress.ip_address(df['address'][i])) == ipaddress.IPv4Address:
-					ipv4_total += 1
-				else:
-					ipv6_total += 1
-				# count appereance of each ip of the country country = {'country_name':0}
-				res = r.country(df['address'][i])
-				if res.country.name not in countries.keys():
-					countries[str(res.country.name)] = 1
-				else:
-					countries[str(res.country.name)] += 1
+		for i in range(0, len(df)):
+			try:
+				if ipaddress.ip_address(df['address'][i]):
+					# create new column with fasle or true
+					df['valid_ip'][i] = True
+					# count ipv4 and ipv6
+					if type(ipaddress.ip_address(df['address'][i])) == ipaddress.IPv4Address:
+						ipv4_total += 1
+					else:
+						ipv6_total += 1
+					# count appereance of each ip of the country country = {'country_name':0}
+					res = r.country(df['address'][i])
+					if res.country.name not in countries.keys():
+						countries[str(res.country.name)] = 1
+					else:
+						countries[str(res.country.name)] += 1
 
-		except ValueError:
-			print('here we see a problem!')
-			df['valid_ip'][i] = False	
-			# count false ip 
-			false_addresses += 1
-
-	print(df)
+			except ValueError:
+				print('here we see a problem!')
+				df['valid_ip'][i] = False	
+				# count false ip 
+				false_addresses += 1
 
 	print('false_addresses:', false_addresses)
 	print('ipv6_total:', ipv6_total)
