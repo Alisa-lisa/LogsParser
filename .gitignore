@@ -25,6 +25,7 @@ var/
 .installed.cfg
 *.egg
 llvmlite/
+tmp/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
