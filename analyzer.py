@@ -1,6 +1,7 @@
 import os, re, random, ipaddress, cProfile, re
-import geoip2
-import geoip2.database as gipd
+# import geoip2
+# import geoip2.database as gipd
+import GeoIP as gi
 
 # some helper functions
 def make_readable(file):
@@ -95,7 +96,8 @@ def parse(s):
 def get_statistics(file_name):
 	f = open(file_name)
 	# create reader object to determine ips origin
-	r = gipd.Reader('tmp/GeoLite2-Country.mmdb')
+	ip4 = gi.open('tmp/GeoIP.dat', gi.GEOIP_STANDARD)
+	ip6 = gi.open("tmp/GeoIPv6.dat", gi.GEOIP_STANDARD)
 	# global results:
 	false_addresses = 0 # the number of non-valid ipadresses in the log file 
 	ip_by_country = {'undefined':0} # {'country':int}
@@ -112,22 +114,35 @@ def get_statistics(file_name):
 				else:
 					ipv6_total += 1
 				# count appereance of each ip of the country country = {'country_name':0}
-				try:
-					if r.country(res[0]):
-						origin = r.country(res[0])
-						if origin.country.name not in ip_by_country.keys():
-							ip_by_country[str(origin.country.name)] = 1
-						else:
-							ip_by_country[str(origin.country.name)] += 1
-				except geoip2.errors.AddressNotFoundError:
-					ip_by_country['undefined'] += 1
+				# since we use legacy GeoIP, we get 2 db for ipv4 and ipv6 -> two cases
+				# ipv4 check on ipv6-db -> None (and vise versa)
+				# check ipv4-db first
+				if ip4.country_name_by_addr(res[0]) != None:
+					origin = ip4.country_name_by_addr(res[0])
+					if origin not in ip_by_country.keys():
+						ip_by_country[origin] = 1
+					else:
+						ip_by_country[origin] += 1
+				# check ipv6-db
+				elif ip6.country_code_by_addr_v6(res[0]) != None:
+					origin = ip6.country_code_by_addr_v6(res[0])
+					if origin not in ip_by_country.keys():
+						ip_by_country[origin] = 1
+					else:
+						ip_by_country[origin] += 1
+				else:
+					ip_by_country['undefined'] += 1	
+				# except geoip2.errors.AddressNotFoundError:
+				# 	ip_by_country['undefined'] += 1
 		except ValueError:
 			false_addresses += 1
 	return false_addresses, ipv4_total, ipv6_total, ip_by_country
 
 if __name__ == '__main__':
 	# Create 5,6MiB file
-	# test = reservoir_algo('access.txt', 35000) 
+	# test = reservoir_algo('access.txt', 60000) 
+	# print(file_info('test_access.txt'))
 	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
-	# print(errors, ipv4, ipv6, geo)
-	# print(geo['undefined'])
+	print(errors, ipv4, ipv6, geo)
+	# # print(geo['undefined'])
+	# # print(geo['Germany'])
