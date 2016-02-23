@@ -48,51 +48,51 @@ def reservoir_algo(input, sample_size):
 def parse(s):
 	new_line = []
 	# clean s from delimeters
-	if re.search("( - - )", s) != None:
-		delimiter = re.search("( - - )", s).group(0)
-		s = s.replace(delimiter, " ")
+	# if re.search("( - - )", s) != None:
+	# 	delimiter = re.search("( - - )", s).group(0)
+	# 	s = s.replace(delimiter, " ")
 
 	# recognize address
 	r = s.split(' ')
 	address = r[0]
 	new_line.append(address)
-	s = s.replace(r[0], '#') 
+	# s = s.replace(r[0], '#') 
 	# get time via regex, cause simple
-	re_time = r"(\[[0-9].*[0-9]\])"
-	time = re.search(re_time, s).group(0)
-	new_line.append(time)
-	s = s.replace(time, '#')
-	# get request
-	r = s.split('"')
-	request = '"' + str(r[1]) + '"'
-	new_line.append(request)
-	s = s.replace(request, '#')
-	# get size via regex, cause ez
-	re_size = r"([0-9]{1,3} [0-9]{1,9})" 
-	size = re.search(re_size, s).group(0)
-	new_line.append(size)
-	s = s.replace(size, '#')
-	# get reference, here if suddenly stays # - means, that it was refered from own ipv4/6 (can not really happen) 
-	# here can also happen, that no agent ingo is provided, in this case we need to distinguish between "-" and "-" 
-	r = s.split('"')
-	reference = '"' + str(r[1]) + '"'
-	new_line.append(reference)
-	# here we need a check, that something is still left for agent, if not -> agent = '"-"'
-	# if there were no agent info provided, than s looks like this: '# # # # # #', it contains 6 signs '#'
-	s = s.replace(reference, '#')
-	# agent info is provided
-	if s.count('#') < 6:
-		# get agent normally
-		r = s.split('"')
-		agent = '"' + str(r[1]) + '"'
-		new_line.append(agent)
-		s = s.replace(agent, '#')
-	else:
-		agent = '"-"' 
-		new_line.append(agent)
+	# re_time = r"(\[[0-9].*[0-9]\])"
+	# time = re.search(re_time, s).group(0)
+	# new_line.append(time)
+	# s = s.replace(time, '#')
+	# # get request
+	# r = s.split('"')
+	# request = '"' + str(r[1]) + '"'
+	# new_line.append(request)
+	# s = s.replace(request, '#')
+	# # get size via regex, cause ez
+	# re_size = r"([0-9]{1,3} [0-9]{1,9})" 
+	# size = re.search(re_size, s).group(0)
+	# new_line.append(size)
+	# s = s.replace(size, '#')
+	# # get reference, here if suddenly stays # - means, that it was refered from own ipv4/6 (can not really happen) 
+	# # here can also happen, that no agent ingo is provided, in this case we need to distinguish between "-" and "-" 
+	# r = s.split('"')
+	# reference = '"' + str(r[1]) + '"'
+	# new_line.append(reference)
+	# # here we need a check, that something is still left for agent, if not -> agent = '"-"'
+	# # if there were no agent info provided, than s looks like this: '# # # # # #', it contains 6 signs '#'
+	# s = s.replace(reference, '#')
+	# # agent info is provided
+	# if s.count('#') < 6:
+	# 	# get agent normally
+	# 	r = s.split('"')
+	# 	agent = '"' + str(r[1]) + '"'
+	# 	new_line.append(agent)
+	# 	s = s.replace(agent, '#')
+	# else:
+	# 	agent = '"-"' 
+	# 	new_line.append(agent)
 	return new_line
 
-# @profile
+@profile
 def get_statistics(file_name):
 	f = open(file_name)
 	# create reader object to determine ips origin
@@ -125,7 +125,7 @@ def get_statistics(file_name):
 						ip_by_country[origin] += 1
 				# check ipv6-db
 				elif ip6.country_code_by_addr_v6(res[0]) != None:
-					origin = ip6.country_code_by_addr_v6(res[0])
+					origin = ip6.country_name_by_addr_v6(res[0])
 					if origin not in ip_by_country.keys():
 						ip_by_country[origin] = 1
 					else:
@@ -139,10 +139,9 @@ def get_statistics(file_name):
 	return false_addresses, ipv4_total, ipv6_total, ip_by_country
 
 if __name__ == '__main__':
-	# Create 5,6MiB file
 	# test = reservoir_algo('access.txt', 60000) 
 	# print(file_info('test_access.txt'))
-	errors, ipv4, ipv6, geo = get_statistics('access.txt')
+	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
 	print(errors, ipv4, ipv6, geo)
 	# # print(geo['undefined'])
 	# # print(geo['Germany'])
