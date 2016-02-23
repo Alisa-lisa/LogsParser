@@ -142,7 +142,7 @@ if __name__ == '__main__':
 	# Create 5,6MiB file
 	# test = reservoir_algo('access.txt', 60000) 
 	# print(file_info('test_access.txt'))
-	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
+	errors, ipv4, ipv6, geo = get_statistics('access.txt')
 	print(errors, ipv4, ipv6, geo)
 	# # print(geo['undefined'])
 	# # print(geo['Germany'])
