@@ -92,7 +92,7 @@ def parse(s):
 	# 	new_line.append(agent)
 	return new_line
 
-@profile
+# @profile
 def get_statistics(file_name):
 	f = open(file_name)
 	# create reader object to determine ips origin
@@ -143,5 +143,5 @@ if __name__ == '__main__':
 	# print(file_info('test_access.txt'))
 	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
 	print(errors, ipv4, ipv6, geo)
-	# # print(geo['undefined'])
-	# # print(geo['Germany'])
+	print(geo['undefined'])
+	print(geo['Germany'])

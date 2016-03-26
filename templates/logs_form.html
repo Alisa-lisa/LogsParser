@@ -33,14 +33,19 @@
           </button>
           <a class="navbar-brand" href="{{ url_for('main') }}">DataVisualizer</a>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right custom-header-bar">
-            <li><a href="#">About Project</a></li>
-            <li><a href="{{ url_for('myCV') }}">About me</a></li>
-            <form class="navbar-form navbar-right">
-            <input type="text" class="form-control" placeholder="Search...">
-            </form>
-          </ul>
+        <div id="navbar" class="navbar-collapse collapse navbar-right">
+          <div class="dropdown custom-dropdown">
+            <button class="btn btn-default dropdown-toggle custom-btn-down" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              Options
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li><a href="{{ url_for('upload_log') }}">NGX combined</a></li>
+              <li><a href="{{ url_for('financial_controller') }}">Financial visualizer</a></li>
+              <li><a href="{{ url_for('myCV') }}">About me</a></li>
+              <li><a href="#">General info</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </nav>

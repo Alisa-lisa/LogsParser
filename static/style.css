@@ -4,6 +4,30 @@
     top: 65px;
 }
 
+.custom-dropdown {
+    margin-top: 9%;
+}
+.custom-btn-down {
+    color: #9D9D8D;
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: bold;
+}
+.custom-btn-down:hover {
+    color: #FBFBFB;
+    background-color: #222222;
+    border-color: transparent;
+}
+.custom-btn-down:focus {
+    color: #FBFBFB;
+    background-color: #222222;
+    border-color: transparent;
+}
+.open>.custom-btn-down:hover {
+    color: #FBFBFB;
+    background-color: #222222;
+    border-color: transparent;
+}
 .custom-general-info {
 	margin-top: 25px;
 }
