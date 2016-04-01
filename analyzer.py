@@ -1,7 +1,8 @@
-import os, re, random, ipaddress, cProfile, re
+import os, re, random, ipaddress, cProfile, re, itertools
 # import geoip2
 # import geoip2.database as gipd
 import GeoIP as gi
+from multiprocessing import Pool, Manager, Process
 
 # some helper functions
 def make_readable(file):
@@ -22,7 +23,7 @@ def file_info(file):
 	for l in f:
 		lines += 1
 	line_size = size / lines
-
+	f.close()
 	return size, lines, line_size
 
 # the information about this sampling can be found on https://en.wikipedia.org/wiki/Reservoir_sampling
@@ -140,8 +141,9 @@ def get_statistics(file_name):
 
 if __name__ == '__main__':
 	# test = reservoir_algo('access.txt', 60000) 
-	# print(file_info('test_access.txt'))
+	print(file_info('test_access.txt'))
 	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
 	print(errors, ipv4, ipv6, geo)
-	print(geo['undefined'])
-	print(geo['Germany'])
+	print("Number of countries counted:", len(geo.keys()))
+	print("undefined:", geo['undefined'])
+	print("Germany:", geo['Germany'])

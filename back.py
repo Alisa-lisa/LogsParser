@@ -1,7 +1,10 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-import logging, os, lzma, zipfile, tarfile, datetime 
+import logging, os, lzma, zipfile, tarfile
+import datetime as dt 
 from werkzeug import secure_filename
+
+from analyzer import *
 
 COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
 
@@ -20,15 +23,17 @@ class Url(db.Model):
 	def __init__(self, url):
 		self.url = url
 
-# model for the log parser
+# model for the log parser, inintial table for csaving unique files (currently we consider name.size to be primary key)
 class LogParser(db.Model):
-	__tablename__ = 'log_parser'
+	__tablename__ = 'initial_upload'
 	id = db.Column(db.Integer, primary_key=True, unique=True)
-	log_name = db.Column(db.String(80), unique=False)
-	# think of version representation
+	file_name = db.Column(db.String(80), unique=False) #, primary_key=True
+	upload_time = db.Column(db.DateTime, unique=False)
+	# ToDo: think of version representation
 
-	def __init__(self, log_name):
-		self.log_name = log_name 
+	def __init__(self, file_name, upload_time):
+		self.file_name = file_name 
+		self.upload_time = upload_time
 
 @app.route('/', methods=['POST', 'GET'])
 def main():
@@ -63,11 +68,6 @@ def extract_file(filename):
 		with zipfile.ZipFile(inF, 'r') as z:
 			with open(outF, 'wb') as i:
 				i.write(z.read(name))
-	# couldn't test it
-	# elif ext == '.rar':
-	# 	with tarfile.open(inF, 'r') as i:
-	# 		with open(outF, 'wb') as o:
-	# 			o.write(i.read())
 	elif ext == '.tar':
 		with tarfile.open(inF, mode='r|*') as i:
 			i.extractall(path=app.config["UPLOAD_FOLDER"])
@@ -76,18 +76,19 @@ def extract_file(filename):
 			i.extractall(path=app.config["UPLOAD_FOLDER"])	
 
 
-
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
 def upload_log():
 	if request.method == 'POST':
+		# get the file, create FileStorage obj
 		file = request.files['upload_log']
 		# we trust the user for now
 		if file:
-			log = LogParser(os.path.splitext(file.filename)[0])
+			name = os.path.splitext(file.filename)[0]
+			time = dt.datetime.now()
+			log = LogParser(name, time)
 			db.session.add(log)
 			db.session.commit()
-			# ToDo improve unique names
 			if os.path.splitext(file.filename)[-1] in COMPRESSION_EXTENSIONS:
 				# save the compressed file. decompress it and delete compressed version
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
