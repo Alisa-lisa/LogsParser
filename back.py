@@ -8,11 +8,13 @@ from analyzer import *
 
 COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
 
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/visualizer'
 db = SQLAlchemy(app)
 app.secret_key = 'f43fee5tbt'
+
 
 # create the model
 class Url(db.Model):
@@ -29,11 +31,28 @@ class LogParser(db.Model):
 	id = db.Column(db.Integer, primary_key=True, unique=True)
 	file_name = db.Column(db.String(80), unique=False) #, primary_key=True
 	upload_time = db.Column(db.DateTime, unique=False)
-	# ToDo: think of version representation
+
+	parse_results = db.relationship('ParseResults', backref='initial_upload', lazy='dynamic')
 
 	def __init__(self, file_name, upload_time):
 		self.file_name = file_name 
 		self.upload_time = upload_time
+
+# table to store results, with name.timestamp
+class ParseResults(db.Model):
+	__tablename__ = 'parse_results'
+	id = db.Column(db.Integer, db.ForeignKey('initial_upload.id'), primary_key=True)
+
+	file_size = db.Column(db.Integer)	# os.stat(filename).st_size
+	unique_code = db.Column(db.Integer) 	# sha1 or md5 checksum
+	country = db.Column(db.String(100))	# get from parser
+	appearance_number = db.Column(db.Integer)	# get form parser
+
+	def __init__(self, file_size, unique_code, country, appearance_number):
+		self.file_size = file_size
+		self.unique_code = unique_code
+		self.country = country
+		self.appearance_number = appearance_number
 
 @app.route('/', methods=['POST', 'GET'])
 def main():

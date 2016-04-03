@@ -125,7 +125,7 @@ def get_statistics(file_name):
 					else:
 						ip_by_country[origin] += 1
 				# check ipv6-db
-				elif ip6.country_code_by_addr_v6(res[0]) != None:
+				elif ip6.country_name_by_addr_v6(res[0]) != None:
 					origin = ip6.country_name_by_addr_v6(res[0])
 					if origin not in ip_by_country.keys():
 						ip_by_country[origin] = 1
