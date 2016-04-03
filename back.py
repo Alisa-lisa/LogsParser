@@ -1,10 +1,20 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-import logging, os, lzma, zipfile, tarfile
+import logging, os, lzma, zipfile, tarfile, hashlib
 import datetime as dt 
 from werkzeug import secure_filename
 
 from analyzer import *
+
+# some helpers
+# get sha1 checksum
+def get_hash(file):
+	s = hashlib.sha1()
+	with open(file, 'rb') as f:
+		for line in f:
+			s.update(line)
+	return s.hexdigest()
+
 
 COMPRESSION_EXTENSIONS = set(['.xz', '.tar', '.zip'])
 
@@ -25,32 +35,30 @@ class Url(db.Model):
 	def __init__(self, url):
 		self.url = url
 
-# model for the log parser, inintial table for csaving unique files (currently we consider name.size to be primary key)
+# model for the log parser, inintial table for saving uploading files
 class LogParser(db.Model):
 	__tablename__ = 'initial_upload'
 	id = db.Column(db.Integer, primary_key=True, unique=True)
-	file_name = db.Column(db.String(80), unique=False) #, primary_key=True
+	file_name = db.Column(db.String(80), unique=False) 
 	upload_time = db.Column(db.DateTime, unique=False)
+	file_size = db.Column(db.Integer)	# os.stat(filename).st_size
+	checksum = db.Column(db.String(120)) 	# sha1 or md5 checksum
+	parse_results = db.relationship('ParseResults', backref='initial_upload', lazy='joined')
 
-	parse_results = db.relationship('ParseResults', backref='initial_upload', lazy='dynamic')
-
-	def __init__(self, file_name, upload_time):
+	def __init__(self, file_name, upload_time, file_size, unique_code):
 		self.file_name = file_name 
 		self.upload_time = upload_time
+		self.file_size = file_size
+		self.checksum = checksum
 
-# table to store results, with name.timestamp
+# table to store results, id => unique foreign keys
 class ParseResults(db.Model):
 	__tablename__ = 'parse_results'
 	id = db.Column(db.Integer, db.ForeignKey('initial_upload.id'), primary_key=True)
+	country = db.Column(db.String(100))	
+	appearance_number = db.Column(db.Integer)
 
-	file_size = db.Column(db.Integer)	# os.stat(filename).st_size
-	unique_code = db.Column(db.Integer) 	# sha1 or md5 checksum
-	country = db.Column(db.String(100))	# get from parser
-	appearance_number = db.Column(db.Integer)	# get form parser
-
-	def __init__(self, file_size, unique_code, country, appearance_number):
-		self.file_size = file_size
-		self.unique_code = unique_code
+	def __init__(self, country, appearance_number):
 		self.country = country
 		self.appearance_number = appearance_number
 
@@ -103,22 +111,37 @@ def upload_log():
 		file = request.files['upload_log']
 		# we trust the user for now
 		if file:
-			name = os.path.splitext(file.filename)[0]
-			time = dt.datetime.now()
-			log = LogParser(name, time)
-			db.session.add(log)
-			db.session.commit()
+			# check whetrher file is compressed, save decompressed version of the uploaded file
 			if os.path.splitext(file.filename)[-1] in COMPRESSION_EXTENSIONS:
 				# save the compressed file. decompress it and delete compressed version
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
 				extract_file(path_name) 
 				os.remove(path_name)
+				# count file size in bytes
+				file_size = os.stat(path_name).st_size
+				# count checksum
+				checksum = get_hash(path_name)
 				return redirect(url_for('upload_log'))
 			else:
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
+				# count file size in bytes
+				file_size = os.stat(path_name).st_size
+				# count checksum
+				checksum = get_hash(path_name)
+
+				print(file_size)
+				print(checksum)
 				return redirect(url_for('upload_log'))
+
+
+			# try to save file first
+# name = os.path.splitext(file.filename)[0]
+# time = dt.datetime.now()
+# log = LogParser(name, time)
+# db.session.add(log)
+# db.session.commit()
 	return render_template('logs_form.html')
 
 @app.route('/logs/<filename>')

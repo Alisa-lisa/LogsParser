@@ -140,10 +140,10 @@ def get_statistics(file_name):
 	return false_addresses, ipv4_total, ipv6_total, ip_by_country
 
 if __name__ == '__main__':
-	# test = reservoir_algo('access.txt', 60000) 
-	print(file_info('test_access.txt'))
-	errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
-	print(errors, ipv4, ipv6, geo)
-	print("Number of countries counted:", len(geo.keys()))
-	print("undefined:", geo['undefined'])
-	print("Germany:", geo['Germany'])
+	test = reservoir_algo('access.txt', 60) 
+	# print(file_info('test_access.txt'))
+	# errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
+	# print(errors, ipv4, ipv6, geo)
+	# print("Number of countries counted:", len(geo.keys()))
+	# print("undefined:", geo['undefined'])
+	# print("Germany:", geo['Germany'])
