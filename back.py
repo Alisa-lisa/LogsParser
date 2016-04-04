@@ -36,23 +36,23 @@ class Url(db.Model):
 		self.url = url
 
 # model for the log parser, inintial table for saving uploading files
-class LogParser(db.Model):
+class InitialFileUpload(db.Model):
 	__tablename__ = 'initial_upload'
 	id = db.Column(db.Integer, primary_key=True, unique=True)
 	file_name = db.Column(db.String(80), unique=False) 
 	upload_time = db.Column(db.DateTime, unique=False)
 	file_size = db.Column(db.Integer)	# os.stat(filename).st_size
 	checksum = db.Column(db.String(120)) 	# sha1 or md5 checksum
-	parse_results = db.relationship('ParseResults', backref='initial_upload', lazy='joined')
+	parse_results = db.relationship('ParseResult', backref='initial_upload', lazy='joined')
 
-	def __init__(self, file_name, upload_time, file_size, unique_code):
+	def __init__(self, file_name, upload_time, file_size, checksum):
 		self.file_name = file_name 
 		self.upload_time = upload_time
 		self.file_size = file_size
 		self.checksum = checksum
 
 # table to store results, id => unique foreign keys
-class ParseResults(db.Model):
+class ParseResult(db.Model):
 	__tablename__ = 'parse_results'
 	id = db.Column(db.Integer, db.ForeignKey('initial_upload.id'), primary_key=True)
 	country = db.Column(db.String(100))	
@@ -122,6 +122,18 @@ def upload_log():
 				file_size = os.stat(path_name).st_size
 				# count checksum
 				checksum = get_hash(path_name)
+
+				# find, whether such (file_name, size, checksum) was already uploaded
+				clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
+				# this file was already uploaded, print "ololo, why again?"
+				if clone:
+					print("Ololo! Why again?")
+				else:
+					upload_time = dt.datetime.now()
+					log = InitialFileUpload(path_name, upload_time, file_size, checksum)
+					db.session.add(log)
+					db.session.commit()
+
 				return redirect(url_for('upload_log'))
 			else:
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -130,6 +142,17 @@ def upload_log():
 				file_size = os.stat(path_name).st_size
 				# count checksum
 				checksum = get_hash(path_name)
+				# find, whether such (file_name, size, checksum) was already uploaded
+				clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
+				# this file was already uploaded, print "ololo, why again?"
+				if clone:
+					print("Ololo! Why again?")
+				else:
+					upload_time = dt.datetime.now()
+					log = InitialFileUpload(path_name, upload_time, file_size, checksum)
+					print('mememe!')
+					db.session.add(log)
+					db.session.commit()
 
 				print(file_size)
 				print(checksum)
@@ -139,7 +162,7 @@ def upload_log():
 			# try to save file first
 # name = os.path.splitext(file.filename)[0]
 # time = dt.datetime.now()
-# log = LogParser(name, time)
+# log = InitialFileUpload(name, time)
 # db.session.add(log)
 # db.session.commit()
 	return render_template('logs_form.html')
