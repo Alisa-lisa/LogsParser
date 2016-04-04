@@ -109,6 +109,7 @@ def upload_log():
 	if request.method == 'POST':
 		# get the file, create FileStorage obj
 		file = request.files['upload_log']
+		path_name = ''
 		# we trust the user for now
 		if file:
 			# check whetrher file is compressed, save decompressed version of the uploaded file
@@ -118,53 +119,29 @@ def upload_log():
 				file.save(path_name)
 				extract_file(path_name) 
 				os.remove(path_name)
-				# count file size in bytes
-				file_size = os.stat(path_name).st_size
-				# count checksum
-				checksum = get_hash(path_name)
-
-				# find, whether such (file_name, size, checksum) was already uploaded
-				clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
-				# this file was already uploaded, print "ololo, why again?"
-				if clone:
-					print("Ololo! Why again?")
-				else:
-					upload_time = dt.datetime.now()
-					log = InitialFileUpload(path_name, upload_time, file_size, checksum)
-					db.session.add(log)
-					db.session.commit()
-
-				return redirect(url_for('upload_log'))
 			else:
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
 				# count file size in bytes
-				file_size = os.stat(path_name).st_size
-				# count checksum
-				checksum = get_hash(path_name)
-				# find, whether such (file_name, size, checksum) was already uploaded
-				clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
-				# this file was already uploaded, print "ololo, why again?"
-				if clone:
-					print("Ololo! Why again?")
-				else:
-					upload_time = dt.datetime.now()
-					log = InitialFileUpload(path_name, upload_time, file_size, checksum)
-					print('mememe!')
-					db.session.add(log)
-					db.session.commit()
+			file_size = os.stat(path_name).st_size
+			# count checksum
+			checksum = get_hash(path_name)
+			# find, whether such (file_name, size, checksum) was already uploaded
+			clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
+			# this file was already uploaded, print "ololo, why again?"
+			if clone:
+				print("Ololo! Why again?")
+			else:
+				upload_time = dt.datetime.now()
+				log = InitialFileUpload(path_name, upload_time, file_size, checksum)
+				print('mememe!')
+				db.session.add(log)
+				db.session.commit()
 
-				print(file_size)
-				print(checksum)
-				return redirect(url_for('upload_log'))
-
-
-			# try to save file first
-# name = os.path.splitext(file.filename)[0]
-# time = dt.datetime.now()
-# log = InitialFileUpload(name, time)
-# db.session.add(log)
-# db.session.commit()
+			print(file_size)
+			print(checksum)
+			
+			return redirect(url_for('upload_log'))
 	return render_template('logs_form.html')
 
 @app.route('/logs/<filename>')
