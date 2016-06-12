@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-import logging, os, lzma, zipfile, tarfile, hashlib
+import logging, hashlib, os
 import datetime as dt 
 from werkzeug import secure_filename
 
-from analyzer import *
+import analyzer
 
 # some helpers
 # get sha1 checksum
@@ -24,6 +24,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/visualizer'
 db = SQLAlchemy(app)
 app.secret_key = 'f43fee5tbt'
+app.debug = True
 
 
 # create the model
@@ -79,30 +80,6 @@ def main():
 	else:
 		return render_template('main.html')
 
-# extract file
-# extractable ext: ['.xz','.zip','.rar','.tar','.gz','.tgz']
-def extract_file(filename):
-	# currently only for 1 level .xz files
-	inF = filename
-	ext = os.path.splitext(inF)[-1]
-	outF = os.path.splitext(inF)[0] #
-	if ext == '.xz':
-		with lzma.open(inF, 'rb') as i:
-			with open(outF, 'wb') as o:
-				o.write(i.read())
-	elif ext == '.zip':
-		name = os.path.splitext(inF)[0]
-		with zipfile.ZipFile(inF, 'r') as z:
-			with open(outF, 'wb') as i:
-				i.write(z.read(name))
-	elif ext == '.tar':
-		with tarfile.open(inF, mode='r|*') as i:
-			i.extractall(path=app.config["UPLOAD_FOLDER"])
-	elif ext == '.gz':
-		with tarfile.open(inF, mode='r|*') as i:
-			i.extractall(path=app.config["UPLOAD_FOLDER"])	
-
-
 # function for the logs upload		
 @app.route('/logs', methods=['GET', 'POST'])
 def upload_log():
@@ -110,37 +87,42 @@ def upload_log():
 		# get the file, create FileStorage obj
 		file = request.files['upload_log']
 		path_name = ''
+		extracted = ''
 		# we trust the user for now
+		print("extracting")
 		if file:
 			# check whetrher file is compressed, save decompressed version of the uploaded file
 			if os.path.splitext(file.filename)[-1] in COMPRESSION_EXTENSIONS:
 				# save the compressed file. decompress it and delete compressed version
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
-				extract_file(path_name) 
-				os.remove(path_name)
+				analyzer.extract_file.spool({"filename":path_name})
+				extracted = os.path.splitext(path_name)[0]
 			else:
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
-				# count file size in bytes
+			# count file size in bytes
+			print(extracted)
 			file_size = os.stat(path_name).st_size
 			# count checksum
 			checksum = get_hash(path_name)
 			# find, whether such (file_name, size, checksum) was already uploaded
 			clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
-			# this file was already uploaded, print "ololo, why again?"
+			# # this file was already uploaded
 			if clone:
-				print("Ololo! Why again?")
+				print("this file was already uploaded once")
 			else:
 				upload_time = dt.datetime.now()
 				log = InitialFileUpload(path_name, upload_time, file_size, checksum)
-				print('mememe!')
 				db.session.add(log)
 				db.session.commit()
 
-			print(file_size)
-			print(checksum)
-			
+			# 	# run the parser here
+			# 	print("spooling")
+			# 	false_addresses, ipv4_total, ipv6_total, ip_by_country = analyzer.get_statistics.spool(path_name)
+			# 	print("done spooling")
+
+
 			return redirect(url_for('upload_log'))
 	return render_template('logs_form.html')
 
@@ -152,19 +134,9 @@ def uploaded_file(filename):
 def financial_controller():
 	return render_template('financial_controller.html')
 
-@app.route('/myCv')
-def myCV():
-	return render_template('myCV.html')
-
 @app.route('/<name>/')
 def test(name):
 	s = "On this page the main infroamtion about the raw data will be shown "
 	t = " The raw data is: %s" 
 	return s + '\n' + t % name
 
-
-if __name__ == '__main__':
-	db.drop_all()
-	db.create_all()
-	app.debug = True
-	app.run(host='0.0.0.0')

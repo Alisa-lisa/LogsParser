@@ -1,8 +1,34 @@
-import os, re, random, ipaddress, cProfile, re, itertools
+import os, re, random, ipaddress, cProfile, re, itertools, lzma, zipfile, tarfile
 # import geoip2
 # import geoip2.database as gipd
 import GeoIP as gi
 from multiprocessing import Pool, Manager, Process
+from uwsgidecorators import spool
+
+# helpers for extracting and decompressing
+@spool
+def extract_file(args):
+	# lol.log.xz
+	inF = args['filename']
+	tup = os.path.splitext(inF)
+	ext = tup[1]
+	outF = tup[0]
+	print(os.getcwd())
+	if ext == '.xz':
+		with lzma.open(inF, 'rb') as i:
+			with open(outF, 'wb') as o:
+				o.write(i.read())
+	elif ext == '.zip':
+		name = os.path.splitext(inF)[0]
+		with zipfile.ZipFile(inF, 'r') as z:
+			with open(outF, 'wb') as i:
+				i.write(z.read(name))
+	elif ext == '.tar':
+		with tarfile.open(inF, mode='r|*') as i:
+			i.extractall(path='uploads')
+	elif ext == '.gz':
+		with tarfile.open(inF, mode='r|*') as i:
+			i.extractall(path='uploads')	
 
 # some helper functions
 def make_readable(file):
@@ -94,6 +120,7 @@ def parse(s):
 	return new_line
 
 # @profile
+@spool
 def get_statistics(file_name):
 	f = open(file_name)
 	# create reader object to determine ips origin
@@ -140,7 +167,8 @@ def get_statistics(file_name):
 	return false_addresses, ipv4_total, ipv6_total, ip_by_country
 
 if __name__ == '__main__':
-	test = reservoir_algo('access.txt', 60) 
+	# test = reservoir_algo('access.txt', 60) 
+	extract_file('uploads/access.log.xz')
 	# print(file_info('test_access.txt'))
 	# errors, ipv4, ipv6, geo = get_statistics('test_access.txt')
 	# print(errors, ipv4, ipv6, geo)
