@@ -81,3 +81,5 @@ uploads/
 .xz
 # Temporary files are not allowed
 *.txt
+# pycharm
+.idea/
