@@ -2,7 +2,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SECRET_KEY = 'change_me'
-    UPLOAD_FOLDER = 'application/log_parser/upload'
+    UPLOAD_FOLDER = 'application/upload'
     COMPRESSION_EXTENSIONS = [".xz", ".tar", ".zip"]
     SQLALCHEMY_DATABASE_URI = "postgresql://localhost/visualizer"
 

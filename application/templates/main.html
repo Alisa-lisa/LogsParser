@@ -41,8 +41,8 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
               <li><a href="{{ url_for('upload_log') }}">NGX combined</a></li>
-              <li><a href="{{ url_for('financial_controller') }}">Financial visualizer</a></li>
-              <li><a href="#">General info</a></li>
+              <!--<li><a href="{{ url_for('financial_controller') }}">Financial visualizer</a></li>-->
+              <!--<li><a href="#">General info</a></li>-->
             </ul>
           </div>
         </div>
@@ -56,7 +56,7 @@
             <li><a href="{{ url_for('upload_log') }}">Log Structure</a></li>
             <li><a href="#">Top Players</a></li>
             <li><a href="#">Forecasts</a></li>
-            <li><a href="{{ url_for('financial_controller') }}">Financial Controller</a></li>
+            <!--<li><a href="{{ url_for('financial_controller') }}">Financial Controller</a></li>-->
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main custom-general-info">
@@ -74,7 +74,7 @@
               <span class="text-muted">Something else</span>
             </div>
             <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+   redirect(url_for('upload_log'))           <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
               <h4>Label</h4>
               <span class="text-muted">Something else</span>
             </div>

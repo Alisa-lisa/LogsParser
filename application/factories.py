@@ -10,7 +10,7 @@ def make_flask_app(name, environment):
     elif environment == "production":
         env_config = "ProductionConfig"
 
-    app = Flask(name)
+    app = Flask(name, template_folder='application/templates/')
     app.config.from_object('config.{}'.format(env_config))
 
     return app
