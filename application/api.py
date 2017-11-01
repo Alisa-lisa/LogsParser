@@ -1,9 +1,10 @@
 from flask import request, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import hashlib, os
-import datetime as dt 
+import datetime as dt
+import pycountry
 from application import factories
-from application import analyzer
+from celery_app import celery_app
 
 environment = os.environ.get('ENVIRONMENT')
 app = factories.make_flask_app("log-parser", environment)
@@ -56,6 +57,8 @@ class ParseResult(db.Model):
 		self.appearance_number = appearance_number
 
 
+
+
 @app.route('/', methods=['POST', 'GET'])
 def main():
 	if request.method == 'POST':
@@ -77,31 +80,18 @@ def main():
 @app.route('/logs', methods=['GET', 'POST'])
 def upload_log():
 	if request.method == 'POST':
-		# get the file, create FileStorage obj
 		file = request.files['upload_log']
-		path_name = ''
-		extracted = ''
-		# we trust the user for now
-		print("extracting")
 		if file:
-			# check whetrher file is compressed, save decompressed version of the uploaded file
-			if os.path.splitext(file.filename)[-1] in COMPRESSION_EXTENSIONS:
-				# save the compressed file. decompress it and delete compressed version
+			if os.path.splitext(file.filename)[-1] in app.config['COMPRESSION_EXTENSIONS']:
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
-				analyzer.extract_file.spool({"filename":path_name})
-				extracted = os.path.splitext(path_name)[0]
+				celery_app.extract.delay(path_name)
 			else:
 				path_name = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 				file.save(path_name)
-			# count file size in bytes
-			print(extracted)
 			file_size = os.stat(path_name).st_size
-			# count checksum
 			checksum = get_hash(path_name)
-			# find, whether such (file_name, size, checksum) was already uploaded
 			clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
-			# # this file was already uploaded
 			if clone:
 				print("this file was already uploaded once")
 			else:
@@ -110,10 +100,9 @@ def upload_log():
 				db.session.add(log)
 				db.session.commit()
 
-			# 	# run the parser here
-			# 	print("celerying")
-			# 	false_addresses, ipv4_total, ipv6_total, ip_by_country = analyzer.get_statistics.spool(path_name)
-			# 	print("done celerying")
+				print("starting ")
+				celery_app.parse.delay(path_name)
+				print("done celerying")
 
 			return redirect(url_for('upload_log'))
 		return render_template('logs_form.html')

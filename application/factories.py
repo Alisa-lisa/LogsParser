@@ -1,4 +1,5 @@
 import os
+import pycountry
 from celery import Celery
 from flask import Flask
 
@@ -16,6 +17,13 @@ def make_flask_app(name, environment):
     return app
 
 
+def populate_countires():
+    countries_codes = {}
+    for c in list(pycountry.countries):
+        countries_codes[c.name.lower()] = c.alpha_3
+    return countries_codes
+
+
 def make_celery(app):
     celery = Celery('tasks',
                     broker=os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
@@ -31,5 +39,7 @@ def make_celery(app):
                 return TaskBase.__call__(self, *args, **kwargs)
 
     celery.Task = ContextTask
+
+    celery.countries = populate_countires()
 
     return celery

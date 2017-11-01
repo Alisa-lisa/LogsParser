@@ -78,12 +78,14 @@ def parse(s):
 	return new_line
 
 
-def get_statistics(file_name):
+def get_statistics(file_name, mapping_dict):
 	f = open(file_name)
 	ip4 = gi.open('tmp/GeoIP.dat', gi.GEOIP_STANDARD)
 	ip6 = gi.open("tmp/GeoIPv6.dat", gi.GEOIP_STANDARD)
 	false_addresses = 0 # the number of non-valid ipadresses in the log file
-	ip_by_country = {'undefined':0} # {'country':int}
+	ip_by_country = {'undefined': 0}
+	for country in mapping_dict.keys():
+		ip_by_country[country.lower()] = 0
 	ipv4_total = 0 # total number of the ipv4
 	ipv6_total = 0 # total number of the ipv6
 
@@ -96,19 +98,17 @@ def get_statistics(file_name):
 				else:
 					ipv6_total += 1
 				if ip4.country_name_by_addr(res[0]):
-					origin = ip4.country_name_by_addr(res[0])
-					if origin not in ip_by_country.keys():
-						ip_by_country[origin] = 1
-					else:
-						ip_by_country[origin] += 1
+					origin = ip4.country_name_by_addr(res[0]).lower()
+					ip_by_country[origin] += 1
 				elif ip6.country_name_by_addr_v6(res[0]):
-					origin = ip6.country_name_by_addr_v6(res[0])
-					if origin not in ip_by_country.keys():
-						ip_by_country[origin] = 1
-					else:
-						ip_by_country[origin] += 1
+					origin = ip6.country_name_by_addr_v6(res[0]).lower()
+					ip_by_country[origin] += 1
 				else:
 					ip_by_country['undefined'] += 1	
 		except ValueError:
 			false_addresses += 1
-	return false_addresses, ipv4_total, ipv6_total, ip_by_country
+	res = {}
+	for key, value in ip_by_country.items():
+		res[mapping_dict[key]] = value
+	return res
+
