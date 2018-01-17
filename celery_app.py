@@ -11,6 +11,30 @@ celery_app = make_celery(make_flask_app("log-parser", environment))
 
 
 @celery_app.task
+def simple_analysis(file):
+    """
+    Computes simple statistics on the file without parsing it's content
+    :param file: path to the file
+    :return: tuple containing simple information
+    """
+    file_size = os.stat(path_name).st_size
+    checksum = get_hash(path_name)
+
+    clone = InitialFileUpload.query.filter_by(file_name=path_name, file_size=file_size, checksum=checksum).first()
+    if clone:
+        print("this file was already uploaded once")
+    else:
+        upload_time = dt.datetime.now()
+        log = InitialFileUpload(path_name, upload_time, file_size, checksum)
+        db.session.add(log)
+        db.session.commit()
+
+        print("starting ")
+        celery_app.parse.delay(path_name)
+        print("done celerying")
+
+
+@celery_app.task(bind=True)
 def extract(file_name):
     """
     Decompresses, analyses given the file
